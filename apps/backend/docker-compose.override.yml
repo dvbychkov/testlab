@@ -1,0 +1,33 @@
+# Этот файл автоматически подхватывается docker compose
+# Он ДОПОЛНЯЕТ docker-compose.yml — не заменяет его
+# Используется только для локальной разработки
+
+services:
+
+  app:
+    # Переопределяем команду запуска — flask dev сервер вместо gunicorn
+    # --reload — перезапускает сервер при изменении кода
+    command: flask --app app run --host 0.0.0.0 --port 5000 --reload
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      # Монтируем код с хоста внутрь контейнера
+      # Любое изменение app.py сразу видно внутри контейнера — hot reload
+      - ./app.py:/app/app.py
+    ports:
+      # В dev режиме открываем порт напрямую для отладки
+      # Можно стучаться на app минуя nginx
+      - "5001:5000"
+
+  postgres:
+    ports:
+      # В dev режиме открываем postgres наружу
+      # Можно подключиться через DBeaver или psql с хоста
+      - "5432:5432"
+
+  redis:
+    ports:
+      # В dev режиме открываем redis наружу
+      # Можно подключиться через redis-cli с хоста
+      - "6379:6379"
